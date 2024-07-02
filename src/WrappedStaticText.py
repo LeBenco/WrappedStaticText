@@ -1,5 +1,5 @@
 """
-JustifiedStaticText
+WrappedStaticText
 Copyright (C) 2024  Benjamin Cohen Boulakia
 
 This program is free software: you can redistribute it and/or modify
