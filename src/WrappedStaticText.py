@@ -1,3 +1,21 @@
+"""
+JustifiedStaticText
+Copyright (C) 2024  Benjamin Cohen Boulakia
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 ################################################################################
 ############################## Wrapped Static Text #############################
 
@@ -134,19 +152,3 @@ class WrappedStaticText(wx.StaticText):
             label_h+=text_h
 
 
-if __name__ == '__main__':
-    app = wx.App()
-    frame = wx.Frame(parent=None, title='Exemple WrappedStaticText')
-    panel = wx.Panel(frame)
-
-    font = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
-    wrapped_text = WrappedStaticText(panel, "This is a very long text that must"
-                                            "be displayed wrapped in a limited space.",
-                                     200, font, max_rows=3, center=True)
-
-    sizer = wx.BoxSizer(wx.VERTICAL)
-    sizer.Add(wrapped_text, 1, wx.EXPAND | wx.ALL, 10)
-    panel.SetSizer(sizer)
-
-    frame.Show()
-    app.MainLoop()
