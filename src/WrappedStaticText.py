@@ -27,26 +27,54 @@ class WrappedStaticText(wx.StaticText):
     and uses the smallest number of rows. If no wrapping is possible, an
     ellipsed label is used, based on the least wide and high combination.
     """
-    def __init__(self, parent, label, width, font, max_rows=None, *args, **kwargs):
-        """
+    def __init__(self, parent, line_spacing_factor=0,
+                 non_breaking_spaces = True, justify_last_line = False,
+                 max_space_width_factor= 1.6, *args, **kwargs):
+              """
         Constructor.
-        
-        * `parent`: wx parent,
-        * `label`: text to be displayed wrapped
-        * `width`: width on which `label` is wrapped
-        * `font`: Font used to compute xrapping and display the wrapped label
-        * all parameters from `wx.StaticText`
+
+        Parameters:
+        * `parent`: wx parent widget.
+        * `line_spacing_factor` (float): Factor applied to the current font size
+            to compute line spacing. Default is 0.
+        * `non_breaking_spaces` (bool): If True, common rules for non-breaking
+            spaces are applied (e.g., forbid wrap after «). Default is True.
+        * `justify_last_line` (bool): If True, the last line of text will be justified.
+            Default is False.
+        * `max_space_width_factor` (float): Maximum width factor for spaces when justifying.
+            Default is 1.6.
+        * `*args`: Additional positional arguments passed to wx.StaticText constructor.
+        * `**kwargs`: Additional keyword arguments passed to wx.StaticText constructor.
+
+        Note:
+        The `style` parameter (either in args or kwargs) will always have
+        `wx.ST_NO_AUTORESIZE` added to it. If `style` is not provided, it will
+        be set to `wx.ST_NO_AUTORESIZE`.
         """
+                     
+        self.non_breaking_spaces = non_breaking_spaces
+        
+        # First thing todo is to extract `style` from arguments in order to add
+        # wx.ST_NO_AUTORESIZE to it
+        
+        # Find the position of 'style' in the parent's __init__ method
+        parent_params = wx.StaticText.__init__.__code__.co_varnames
+        style_index = parent_params.index('style') if 'style' in parent_params else -1
+
+        # Update style in args or kwargs with wx.ST_NO_AUTORESIZE
+        if "style" in wx.StaticText.__init__.__code__.co_varnames:
+            args = dict(enumerate(args))
+            args["style"] = args["style"] | wx.ST_NO_AUTORESIZE
+            args = tuple(args.values())
+        else:
+            kwargs["style"] = kwargs.get("style", 0) | wx.ST_NO_AUTORESIZE
+
+        # Call parent constructor
         super().__init__(parent, *args, **kwargs)
-        
-        self.wrappedWidth = width
-        self.maxRows = max_rows
-        
-        # The unwrapped label must be saved in order to manage resizing
-        self._unwrappedLabel = label
-        self.SetFont(font)
-        self.SetLabel(label)
-        self.Bind(wx.EVT_SIZE, self._OnResize) 
+        self.line_spacing_factor = line_spacing_factor
+        self.justify_last_line = justify_last_line
+        self.max_space_width_factor = max_space_width_factor
+        self.Bind(wx.EVT_PAINT, self._OnPaint)
 
     def SetLabel(self, label):
         """
