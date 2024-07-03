@@ -52,7 +52,7 @@ class WrappedStaticText(wx.StaticText):
         be set to `wx.ST_NO_AUTORESIZE`.
         """
                      
-        self.non_breaking_spaces = non_breaking_spaces
+        self._nonBreakingSpaces = non_breaking_spaces
         
         # First thing todo is to extract `style` from arguments in order to add
         # wx.ST_NO_AUTORESIZE to it
@@ -63,9 +63,10 @@ class WrappedStaticText(wx.StaticText):
 
         # Update style in args or kwargs with wx.ST_NO_AUTORESIZE
         if "style" in wx.StaticText.__init__.__code__.co_varnames:
-            args = dict(enumerate(args))
-            args["style"] = args["style"] | wx.ST_NO_AUTORESIZE
-            args = tuple(args.values())
+            args_list = list(args)
+            style_index = wx.StaticText.__init__.__code__.co_varnames.index("style")
+            args_list[style_index] = args_list[style_index] | wx.ST_NO_AUTORESIZE
+            args = tuple(args_list)
         else:
             kwargs["style"] = kwargs.get("style", 0) | wx.ST_NO_AUTORESIZE
 
