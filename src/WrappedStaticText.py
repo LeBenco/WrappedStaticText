@@ -27,7 +27,7 @@ class WrappedStaticText(wx.StaticText):
     and uses the smallest number of rows. If no wrapping is possible, an
     ellipsed label is used, based on the least wide and high combination.
     """
-    def __init__(self, parent, label, width, font, max_rows=None, center=False):
+    def __init__(self, parent, label, width, font, max_rows=None, *args, **kwargs):
         """
         Constructor.
         
@@ -35,18 +35,18 @@ class WrappedStaticText(wx.StaticText):
         * `label`: text to be displayed wrapped
         * `width`: width on which `label` is wrapped
         * `font`: Font used to compute xrapping and display the wrapped label
-        * `center`: Whether the wrapped label is centered
+        * all parameters from `wx.StaticText`
         """
-        super().__init__(parent)
+        super().__init__(parent, *args, **kwargs)
         
-        self.center = center
-        self.unwrappedLabel = label
         self.wrappedWidth = width
         self.maxRows = max_rows
         
+        # The unwrapped label must be saved in order to manage resizing
+        self._unwrappedLabel = label
         self.SetFont(font)
         self.SetLabel(label)
-        self.Bind(wx.EVT_PAINT, self._OnPaint) 
+        self.Bind(wx.EVT_SIZE, self._OnResize) 
 
     def SetLabel(self, label):
         """
@@ -54,6 +54,7 @@ class WrappedStaticText(wx.StaticText):
         
         * `label`: new label to wrap and display
         """
+        self._unwrappedLabel = label
         dc = wx.ScreenDC()
         dc.SetFont(self.GetFont())
         
@@ -105,7 +106,7 @@ class WrappedStaticText(wx.StaticText):
         * `font`: new font to wrap and display the text's label with
         """
         super().SetFont(font)
-        self.SetLabel(self.unwrappedLabel)
+        self.SetLabel(self._unwrappedLabel)
 
     def _GetWrappings(self, text, words):
         """
@@ -131,24 +132,9 @@ class WrappedStaticText(wx.StaticText):
             yield from self._GetWrappings(text+" "  + words[0], words[1:])
             yield from self._GetWrappings(text+"\n" + words[0], words[1:])
     
-    def _OnPaint(self, event):
+    def _OnResize(self, event):
         """
         Paint callback. Overrides the paint event callback so that centered text
         painting renders the right way with wrapped text.
         """
-        dc = wx.PaintDC(self) 
-        dc.Clear()
-
-        curr_width, curr_height = self.GetSize()
-        
-        label_h = 0
-        for line in self.GetLabel().split("\n"):
-            text_w, text_h = dc.GetTextExtent(line)
-            if self.center:
-                w = (curr_width - text_w)/2
-            else:
-                w = 0
-            dc.DrawText(line, int(w), int(label_h))
-            label_h+=text_h
-
-
+        self.SetLabel(self._unwrappedLabel)
