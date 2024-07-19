@@ -1,5 +1,8 @@
 A `wx.StaticText` with advanced wrapping management. Every possible wrapping of the label is computed (can be CPU-consuming if label has many spaces) and the best one is selected, i.e. the one that respects the wrapping rule and uses the smallest number of rows. If no wrapping is possible, an ellipsed label is used, based on the least wide and high combination.
 
+Please note that this is a proof of concept and may require adaptation to meet specific needs.
+
+Example:
 ```python
 if __name__ == '__main__':
     app = wx.App()
